@@ -83,3 +83,11 @@ LOGIN_URL = 'login'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+# Subpath routing settings for /jagdtagebuch/
+FORCE_SCRIPT_NAME = '/jagdtagebuch'
+CSRF_TRUSTED_ORIGINS = ['http://194.164.206.13', 'https://194.164.206.13']
+SESSION_COOKIE_PATH = '/jagdtagebuch'
+CSRF_COOKIE_PATH = '/jagdtagebuch'
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
