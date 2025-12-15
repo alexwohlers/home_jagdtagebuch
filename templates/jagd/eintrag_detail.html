@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load task_filters %}
+
+{% block title %}{{ eintrag.get_wildart_display }} - Jagdtagebuch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .wild-emoji-large {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    .detail-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    .detail-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        color: #6c757d;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .detail-value {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+    .badge-geschlecht {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="detail-header text-center">
+                <div class="wild-emoji-large">{{ eintrag.get_wildart_emoji }}</div>
+                <h2 class="mb-2">{{ eintrag.get_wildart_display }}</h2>
+                <p class="mb-0 opacity-75">
+                    <i class="bi bi-calendar3 me-1"></i>{{ eintrag.datum|date:"l, d. F Y" }}
+                    {% if eintrag.uhrzeit %}
+                    <span class="mx-2">•</span>
+                    <i class="bi bi-clock me-1"></i>{{ eintrag.uhrzeit|time:"H:i" }} Uhr
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Details -->
+            <div class="card detail-card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Linke Spalte -->
+                        <div class="col-md-6">
+                            {% if eintrag.geschlecht != 'u' %}
+                            <div class="detail-item">
+                                <div class="detail-label">Geschlecht</div>
+                                <div class="detail-value">
+                                    {% if eintrag.geschlecht == 'm' %}
+                                    <span class="badge bg-primary badge-geschlecht">♂ Männlich</span>
+                                    {% else %}
+                                    <span class="badge bg-danger badge-geschlecht">♀ Weiblich</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.gewicht %}
+                            <div class="detail-item">
+                                <div class="detail-label">Gewicht</div>
+                                <div class="detail-value">{{ eintrag.gewicht }} kg</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.alter_geschaetzt %}
+                            <div class="detail-item">
+                                <div class="detail-label">Geschätztes Alter</div>
+                                <div class="detail-value">{{ eintrag.alter_geschaetzt }}</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.revier %}
+                            <div class="detail-item">
+                                <div class="detail-label">Revier / Ort</div>
+                                <div class="detail-value"><i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Rechte Spalte -->
+                        <div class="col-md-6">
+                            {% if eintrag.jagdart %}
+                            <div class="detail-item">
+                                <div class="detail-label">Jagdart</div>
+                                <div class="detail-value">{{ eintrag.jagdart }}</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.waffe %}
+                            <div class="detail-item">
+                                <div class="detail-label">Waffe / Kaliber</div>
+                                <div class="detail-value">{{ eintrag.waffe }}</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.entfernung %}
+                            <div class="detail-item">
+                                <div class="detail-label">Schussentfernung</div>
+                                <div class="detail-value">{{ eintrag.entfernung }} m</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.wetter or eintrag.temperatur %}
+                            <div class="detail-item">
+                                <div class="detail-label">Wetter</div>
+                                <div class="detail-value">
+                                    {{ eintrag.wetter|default:"-" }}
+                                    {% if eintrag.temperatur %}
+                                    <span class="text-muted ms-2">({{ eintrag.temperatur }}°C)</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if eintrag.notizen %}
+                    <div class="detail-item pt-3 mt-2">
+                        <div class="detail-label">Notizen</div>
+                        <div class="detail-value mt-2" style="white-space: pre-line;">{{ eintrag.notizen }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Meta-Info -->
+            <div class="card detail-card mb-4">
+                <div class="card-body">
+                    <small class="text-muted">
+                        <i class="bi bi-clock-history me-1"></i>
+                        Erstellt: {{ eintrag.created_at|date:"d.m.Y H:i" }}
+                        {% if eintrag.updated_at != eintrag.created_at %}
+                        <span class="mx-2">•</span>
+                        Zuletzt bearbeitet: {{ eintrag.updated_at|date:"d.m.Y H:i" }}
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Aktionen -->
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'jagd_dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Zurück
+                </a>
+                <div>
+                    <a href="{% url 'jagd_eintrag_bearbeiten' eintrag.pk %}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-pencil me-1"></i>Bearbeiten
+                    </a>
+                    <a href="{% url 'jagd_eintrag_loeschen' eintrag.pk %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i>Löschen
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

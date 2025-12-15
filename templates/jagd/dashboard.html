@@ -1,0 +1,284 @@
+﻿{% extends 'base.html' %}
+
+
+{% block title %}Jagdtagebuch - Projektplanung{% endblock %}
+
+{% block extra_css %}
+<style>
+    .jagd-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 50%, #6b8e23 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .jagd-header::before {
+        content: 'ðŸ¦Œ';
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 5rem;
+        opacity: 0.2;
+    }
+    .stat-card {
+        border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+    .wild-card {
+        border-radius: 10px;
+        transition: all 0.2s;
+        border-left: 4px solid #4a7c23;
+    }
+    .wild-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateX(5px);
+    }
+    .wild-emoji {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    .revier-badge {
+        background: linear-gradient(135deg, #6b8e23 0%, #556b2f 100%);
+        color: white;
+        padding: 0.3em 0.8em;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    .saison-badge {
+        background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+        color: white;
+        padding: 0.4em 1em;
+        border-radius: 25px;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: #4a7c23;
+        opacity: 0.5;
+    }
+    .chart-placeholder {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="jagd-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1"><i class="bi bi-crosshair me-2"></i>Jagdtagebuch</h2>
+                <p class="mb-0 opacity-75">
+                    Saison {{ saison_start|date:"Y" }}/{{ saison_ende|date:"Y" }}
+                    <span class="saison-badge ms-2">{{ saison_stats.gesamt }} StÃ¼ck</span>
+                </p>
+            </div>
+            <a href="{% url 'eintrag_neu' %}" class="btn btn-light btn-lg">
+                <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistik-Karten -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #4a7c23 0%, #6b8e23 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸ¦Œ</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.rehwild }}</div>
+                    <div class="small opacity-75">Rehwild</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #5c4033 0%, #8b4513 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸ—</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.schwarzwild }}</div>
+                    <div class="small opacity-75">Schwarzwild</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #8fbc8f 0%, #3cb371 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸ°</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.niederwild }}</div>
+                    <div class="small opacity-75">Niederwild</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #cd853f 0%, #d2691e 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸ¦Š</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.raubwild }}</div>
+                    <div class="small opacity-75">Raubwild</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #2e8b57 0%, #228b22 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸŽ¯</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.gesamt }}</div>
+                    <div class="small opacity-75">Gesamt</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #556b2f 0%, #6b8e23 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="stat-icon">ðŸ“Š</div>
+                    <div class="fs-2 fw-bold">{{ alle_count }}</div>
+                    <div class="small opacity-75">Alle Jahre</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Linke Spalte: Letzte EintrÃ¤ge -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Letzte EintrÃ¤ge</h5>
+                    <a href="{% url 'liste' %}" class="btn btn-outline-success btn-sm">
+                        Alle anzeigen <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    {% if letzte_eintraege %}
+                    {% for eintrag in letzte_eintraege %}
+                    <div class="wild-card d-flex align-items-center p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <span class="wild-emoji">{{ eintrag.get_wildart_emoji }}</span>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center">
+                                <h6 class="mb-0 me-2">{{ eintrag.get_wildart_display }}</h6>
+                                {% if eintrag.geschlecht == 'm' %}
+                                <span class="badge bg-primary">â™‚</span>
+                                {% elif eintrag.geschlecht == 'w' %}
+                                <span class="badge bg-danger">â™€</span>
+                                {% endif %}
+                                {% if eintrag.gewicht %}
+                                <span class="badge bg-secondary ms-1">{{ eintrag.gewicht }} kg</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>{{ eintrag.datum|date:"d.m.Y" }}
+                                {% if eintrag.uhrzeit %}<span class="mx-1">â€¢</span><i class="bi bi-clock me-1"></i>{{ eintrag.uhrzeit|time:"H:i" }}{% endif %}
+                                {% if eintrag.revier %}<span class="mx-1">â€¢</span><i class="bi bi-geo-alt me-1"></i>{{ eintrag.revier }}{% endif %}
+                            </small>
+                        </div>
+                        <div class="btn-group">
+                            <a href="{% url 'eintrag_detail' eintrag.pk %}" class="btn btn-outline-secondary btn-sm" title="Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'eintrag_bearbeiten' eintrag.pk %}" class="btn btn-outline-secondary btn-sm" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-journal-x d-block"></i>
+                        <h5>Noch keine EintrÃ¤ge</h5>
+                        <p class="text-muted mb-3">Dokumentiere deinen ersten Jagderfolg!</p>
+                        <a href="{% url 'eintrag_neu' %}" class="btn btn-outline-success">
+                            <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Rechte Spalte: Statistiken -->
+        <div class="col-lg-4">
+            <!-- Wildarten-Verteilung -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Wildarten (Saison)</h6>
+                </div>
+                <div class="card-body">
+                    {% if wildarten_stats %}
+                    {% for stat in wildarten_stats %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                            {% for group, choices in WILDART_CHOICES %}
+                                {% for value, label in choices %}
+                                    {% if value == stat.wildart %}{{ label }}{% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </span>
+                        <span class="badge bg-success rounded-pill">{{ stat.count }}x</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted text-center mb-0">Noch keine Daten</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Reviere -->
+            {% if reviere %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>HÃ¤ufigste Reviere</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for rev in reviere %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-pin-map me-2 text-success"></i>{{ rev.revier }}</span>
+                        <span class="badge bg-secondary rounded-pill">{{ rev.count }}x</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Schnellzugriff -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-lightning me-2"></i>Schnellzugriff</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'eintrag_neu' %}" class="btn btn-success">
+                            <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
+                        </a>
+                        <a href="{% url 'liste' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-ul me-1"></i>Alle EintrÃ¤ge
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

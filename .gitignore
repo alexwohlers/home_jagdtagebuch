@@ -1,0 +1,34 @@
+# Database
+db.sqlite3
+*.sqlite3
+
+# Static files (generated)
+staticfiles/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Logs
+*.log
+access.log
+error.log
+
+# Socket files
+*.sock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

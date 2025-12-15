@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load task_filters %}
+
+{% block title %}Alle Erlegungen - Jagdtagebuch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .jagd-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .filter-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+    .list-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    .jagd-row {
+        transition: background 0.2s;
+    }
+    .jagd-row:hover {
+        background: #f8f9fa;
+    }
+    .wild-emoji {
+        font-size: 1.8rem;
+        margin-right: 0.5rem;
+    }
+    .badge-geschlecht-m {
+        background: #0d6efd;
+    }
+    .badge-geschlecht-w {
+        background: #dc3545;
+    }
+    .badge-geschlecht-u {
+        background: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="jagd-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h2 class="mb-0"><i class="bi bi-list-ul me-2"></i>Alle Erlegungen</h2>
+                <p class="mb-0 mt-2 opacity-75">{{ eintraege.count }} Einträge</p>
+            </div>
+            <div>
+                <a href="{% url 'jagd_dashboard' %}" class="btn btn-outline-light me-2">
+                    <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                </a>
+                <a href="{% url 'jagd_eintrag_neu' %}" class="btn btn-light text-success">
+                    <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card filter-card">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Wildart</label>
+                    <select name="wildart" class="form-select">
+                        <option value="">Alle Wildarten</option>
+                        <optgroup label="Schalenwild">
+                            <option value="rehwild" {% if request.GET.wildart == 'rehwild' %}selected{% endif %}>🦌 Rehwild</option>
+                            <option value="schwarzwild" {% if request.GET.wildart == 'schwarzwild' %}selected{% endif %}>🐗 Schwarzwild</option>
+                            <option value="rotwild" {% if request.GET.wildart == 'rotwild' %}selected{% endif %}>🦌 Rotwild</option>
+                            <option value="damwild" {% if request.GET.wildart == 'damwild' %}selected{% endif %}>🦌 Damwild</option>
+                            <option value="muffelwild" {% if request.GET.wildart == 'muffelwild' %}selected{% endif %}>🐑 Muffelwild</option>
+                            <option value="gamswild" {% if request.GET.wildart == 'gamswild' %}selected{% endif %}>🐐 Gamswild</option>
+                        </optgroup>
+                        <optgroup label="Niederwild">
+                            <option value="hase" {% if request.GET.wildart == 'hase' %}selected{% endif %}>🐰 Hase</option>
+                            <option value="wildkaninchen" {% if request.GET.wildart == 'wildkaninchen' %}selected{% endif %}>🐇 Wildkaninchen</option>
+                            <option value="fasan" {% if request.GET.wildart == 'fasan' %}selected{% endif %}>🐓 Fasan</option>
+                            <option value="rebhuhn" {% if request.GET.wildart == 'rebhuhn' %}selected{% endif %}>🐦 Rebhuhn</option>
+                            <option value="wildente" {% if request.GET.wildart == 'wildente' %}selected{% endif %}>🦆 Wildente</option>
+                            <option value="wildgans" {% if request.GET.wildart == 'wildgans' %}selected{% endif %}>🪿 Wildgans</option>
+                            <option value="wildtaube" {% if request.GET.wildart == 'wildtaube' %}selected{% endif %}>🕊️ Wildtaube</option>
+                        </optgroup>
+                        <optgroup label="Raubwild">
+                            <option value="fuchs" {% if request.GET.wildart == 'fuchs' %}selected{% endif %}>🦊 Fuchs</option>
+                            <option value="dachs" {% if request.GET.wildart == 'dachs' %}selected{% endif %}>🦡 Dachs</option>
+                            <option value="marder" {% if request.GET.wildart == 'marder' %}selected{% endif %}>🐾 Marder</option>
+                            <option value="waschbaer" {% if request.GET.wildart == 'waschbaer' %}selected{% endif %}>🦝 Waschbär</option>
+                            <option value="marderhund" {% if request.GET.wildart == 'marderhund' %}selected{% endif %}>🐕 Marderhund</option>
+                        </optgroup>
+                        <optgroup label="Sonstiges">
+                            <option value="sonstiges" {% if request.GET.wildart == 'sonstiges' %}selected{% endif %}>❓ Sonstiges</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Revier</label>
+                    <select name="revier" class="form-select">
+                        <option value="">Alle Reviere</option>
+                        {% for revier in reviere %}
+                        <option value="{{ revier }}" {% if request.GET.revier == revier %}selected{% endif %}>{{ revier }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Jahr</label>
+                    <select name="jahr" class="form-select">
+                        <option value="">Alle Jahre</option>
+                        {% for jahr in jahre %}
+                        <option value="{{ jahr }}" {% if request.GET.jahr|add:"0" == jahr %}selected{% endif %}>{{ jahr }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Sortierung</label>
+                    <select name="sort" class="form-select">
+                        <option value="-datum" {% if request.GET.sort == '-datum' or not request.GET.sort %}selected{% endif %}>Neueste zuerst</option>
+                        <option value="datum" {% if request.GET.sort == 'datum' %}selected{% endif %}>Älteste zuerst</option>
+                        <option value="wildart" {% if request.GET.sort == 'wildart' %}selected{% endif %}>Wildart A-Z</option>
+                        <option value="-gewicht" {% if request.GET.sort == '-gewicht' %}selected{% endif %}>Gewicht (schwerstes)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-funnel me-1"></i>Filtern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste -->
+    <div class="card list-card">
+        {% if eintraege %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">Wild</th>
+                        <th>Datum</th>
+                        <th>Wildart</th>
+                        <th>Geschlecht</th>
+                        <th>Gewicht</th>
+                        <th>Revier</th>
+                        <th style="width: 100px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eintrag in eintraege %}
+                    <tr class="jagd-row">
+                        <td>
+                            <span class="wild-emoji">{{ eintrag.get_wildart_emoji }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ eintrag.datum|date:"d.m.Y" }}</strong>
+                            {% if eintrag.uhrzeit %}
+                            <br><small class="text-muted">{{ eintrag.uhrzeit|time:"H:i" }} Uhr</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ eintrag.get_wildart_display }}</td>
+                        <td>
+                            {% if eintrag.geschlecht == 'm' %}
+                            <span class="badge badge-geschlecht-m">♂</span>
+                            {% elif eintrag.geschlecht == 'w' %}
+                            <span class="badge badge-geschlecht-w">♀</span>
+                            {% else %}
+                            <span class="badge badge-geschlecht-u">?</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if eintrag.gewicht %}
+                            {{ eintrag.gewicht }} kg
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if eintrag.revier %}
+                            <i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier }}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'jagd_eintrag_detail' eintrag.pk %}" class="btn btn-sm btn-outline-success me-1" title="Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'jagd_eintrag_bearbeiten' eintrag.pk %}" class="btn btn-sm btn-outline-secondary" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body text-center py-5">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🦌</div>
+            <h5 class="text-muted">Keine Einträge gefunden</h5>
+            <p class="text-muted mb-4">
+                {% if request.GET.wildart or request.GET.revier or request.GET.jahr %}
+                Mit den aktuellen Filtern wurden keine Einträge gefunden.
+                {% else %}
+                Du hast noch keine Erlegungen eingetragen.
+                {% endif %}
+            </p>
+            {% if request.GET.wildart or request.GET.revier or request.GET.jahr %}
+            <a href="{% url 'jagd_liste' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-x-lg me-1"></i>Filter zurücksetzen
+            </a>
+            {% endif %}
+            <a href="{% url 'jagd_eintrag_neu' %}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>Erster Eintrag
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
