@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load task_filters %}
+
 
 {% block title %}{% if eintrag %}Eintrag bearbeiten{% else %}Neuer Eintrag{% endif %} - Jagdtagebuch{% endblock %}
 
@@ -259,7 +259,7 @@
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-between pt-3 border-top">
-                        <a href="{% url 'jagd_dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-lg">
                             <i class="bi bi-arrow-left me-1"></i>Abbrechen
                         </a>
                         <button type="submit" class="btn btn-success btn-lg">

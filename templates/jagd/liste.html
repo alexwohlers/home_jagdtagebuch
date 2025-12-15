@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load task_filters %}
+
 
 {% block title %}Alle Erlegungen - Jagdtagebuch{% endblock %}
 
@@ -55,10 +55,10 @@
                 <p class="mb-0 mt-2 opacity-75">{{ eintraege.count }} Einträge</p>
             </div>
             <div>
-                <a href="{% url 'jagd_dashboard' %}" class="btn btn-outline-light me-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-light me-2">
                     <i class="bi bi-speedometer2 me-1"></i>Dashboard
                 </a>
-                <a href="{% url 'jagd_eintrag_neu' %}" class="btn btn-light text-success">
+                <a href="{% url 'eintrag_neu' %}" class="btn btn-light text-success">
                     <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
                 </a>
             </div>
@@ -191,10 +191,10 @@
                             {% endif %}
                         </td>
                         <td class="text-end">
-                            <a href="{% url 'jagd_eintrag_detail' eintrag.pk %}" class="btn btn-sm btn-outline-success me-1" title="Details">
+                            <a href="{% url 'eintrag_detail' eintrag.pk %}" class="btn btn-sm btn-outline-success me-1" title="Details">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{% url 'jagd_eintrag_bearbeiten' eintrag.pk %}" class="btn btn-sm btn-outline-secondary" title="Bearbeiten">
+                            <a href="{% url 'eintrag_bearbeiten' eintrag.pk %}" class="btn btn-sm btn-outline-secondary" title="Bearbeiten">
                                 <i class="bi bi-pencil"></i>
                             </a>
                         </td>
@@ -215,11 +215,11 @@
                 {% endif %}
             </p>
             {% if request.GET.wildart or request.GET.revier or request.GET.jahr %}
-            <a href="{% url 'jagd_liste' %}" class="btn btn-outline-secondary me-2">
+            <a href="{% url 'liste' %}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-x-lg me-1"></i>Filter zurücksetzen
             </a>
             {% endif %}
-            <a href="{% url 'jagd_eintrag_neu' %}" class="btn btn-success">
+            <a href="{% url 'eintrag_neu' %}" class="btn btn-success">
                 <i class="bi bi-plus-lg me-1"></i>Erster Eintrag
             </a>
         </div>
