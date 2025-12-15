@@ -13,21 +13,21 @@ echo ""
 cd $APP_DIR
 
 # Save current settings
-echo "[1/7] Saving local settings..."
+echo "[1/8] Saving local settings..."
 cp $SETTINGS_FILE /tmp/settings_backup.py
 
 # Reset and pull
-echo "[2/7] Pulling latest changes from GitHub..."
+echo "[2/8] Pulling latest changes from GitHub..."
 git fetch origin
 git reset --hard origin/main
 
 # Restore settings
-echo "[3/7] Restoring local settings..."
+echo "[3/8] Restoring local settings..."
 cp /tmp/settings_backup.py $SETTINGS_FILE
 
 # Ensure subpath settings are present
 if ! grep -q "FORCE_SCRIPT_NAME" $SETTINGS_FILE; then
-    echo "[3b/7] Adding subpath routing settings..."
+    echo "[3b/8] Adding subpath routing settings..."
     cat >> $SETTINGS_FILE << 'SETTINGS'
 
 # Subpath routing settings for /jagdtagebuch/
@@ -41,19 +41,23 @@ SETTINGS
 fi
 
 # Install dependencies
-echo "[4/7] Installing dependencies..."
+echo "[4/8] Installing dependencies..."
 venv/bin/pip install -r requirements.txt -q
 
+# Create migrations if needed
+echo "[5/8] Creating migrations..."
+venv/bin/python manage.py makemigrations --noinput 2>/dev/null || true
+
 # Run migrations
-echo "[5/7] Running migrations..."
+echo "[6/8] Running migrations..."
 venv/bin/python manage.py migrate --noinput
 
 # Collect static files
-echo "[6/7] Collecting static files..."
+echo "[7/8] Collecting static files..."
 venv/bin/python manage.py collectstatic --noinput -v 0
 
 # Fix permissions
-echo "[7/7] Fixing permissions..."
+echo "[8/8] Fixing permissions..."
 chown -R www-data:www-data $APP_DIR
 
 # Restart service
@@ -61,7 +65,22 @@ echo ""
 echo "Restarting Jagdtagebuch service..."
 systemctl restart jagdtagebuch
 
+# Wait for service to start
+sleep 2
+
 # Show status
 echo ""
 echo "=== Update complete! ==="
+echo ""
 systemctl status jagdtagebuch --no-pager -l | head -15
+
+# Test if service is running
+if systemctl is-active --quiet jagdtagebuch; then
+    echo ""
+    echo " Jagdtagebuch is running at http://194.164.206.13/jagdtagebuch/"
+else
+    echo ""
+    echo " ERROR: Service failed to start!"
+    journalctl -u jagdtagebuch -n 20 --no-pager
+    exit 1
+fi
