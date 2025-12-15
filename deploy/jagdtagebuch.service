@@ -1,0 +1,13 @@
+﻿[Unit]
+Description=Jagdtagebuch Gunicorn Daemon
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/jagdtagebuch
+Environment="PATH=/var/www/jagdtagebuch/venv/bin"
+ExecStart=/var/www/jagdtagebuch/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8002 jagdtagebuch.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
