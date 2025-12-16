@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ aktion }} - Jagdtagebuch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person{% if benutzer %}-gear{% else %}-plus{% endif %} me-2"></i>{{ aktion }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Benutzername *</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   value="{{ benutzer.username|default:'' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                Passwort {% if benutzer %}(leer lassen = nicht ändern){% else %}*{% endif %}
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password"
+                                   {% if not benutzer %}required{% endif %} minlength="8">
+                            <div class="form-text">Mindestens 8 Zeichen</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password2" class="form-label">Passwort bestätigen</label>
+                            <input type="password" class="form-control" id="password2" name="password2"
+                                   {% if not benutzer %}required{% endif %}>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_superuser" name="is_superuser"
+                                       {% if benutzer.is_superuser %}checked{% endif %}>
+                                <label class="form-check-label" for="is_superuser">
+                                    <i class="bi bi-shield-fill text-warning me-1"></i>Administrator
+                                </label>
+                            </div>
+                            <div class="form-text">Administratoren können Benutzer verwalten</div>
+                        </div>
+                        
+                        {% if benutzer %}
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                       {% if benutzer.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active">
+                                    Konto aktiv
+                                </label>
+                            </div>
+                            <div class="form-text">Inaktive Benutzer können sich nicht anmelden</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'benutzer_liste' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-1"></i>Abbrechen
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Hochsitze - Jagdtagebuch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-house me-2"></i>Hochsitze
+            {% if revier_filter %}
+            <small class="text-muted">in {{ revier_filter.name }}</small>
+            {% endif %}
+        </h2>
+        <a href="{% if revier_filter %}{% url 'hochsitz_neu_revier' revier_filter.pk %}{% else %}{% url 'hochsitz_neu' %}{% endif %}" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>Neuer Hochsitz
+        </a>
+    </div>
+    
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Revier</label>
+                    <select class="form-select" onchange="window.location.href=this.value">
+                        <option value="{% url 'hochsitz_liste' %}">Alle Reviere</option>
+                        {% for r in reviere %}
+                        <option value="{% url 'hochsitz_liste_revier' r.pk %}" {% if revier_filter.pk == r.pk %}selected{% endif %}>
+                            {{ r.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Zustand</label>
+                    <select name="zustand" class="form-select" onchange="this.form.submit()">
+                        <option value="">Alle</option>
+                        {% for value, label in ZUSTAND_CHOICES %}
+                        <option value="{{ value }}" {% if zustand_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <a href="{% url 'revier_liste' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-geo-alt me-1"></i>Reviere verwalten
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Hochsitz-Liste -->
+    <div class="row">
+        {% for hochsitz in hochsitze %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 {% if not hochsitz.aktiv %}bg-light{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">
+                            <span class="me-1">{{ hochsitz.get_typ_emoji }}</span>{{ hochsitz.name }}
+                        </h5>
+                        {% if not hochsitz.aktiv %}
+                        <span class="badge bg-secondary">Inaktiv</span>
+                        {% endif %}
+                    </div>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="bi bi-geo-alt me-1"></i>{{ hochsitz.revier.name }}
+                    </p>
+                    <div class="mb-2">
+                        <span class="badge {% if hochsitz.zustand == 'gut' %}bg-success{% elif hochsitz.zustand == 'neu' %}bg-info{% elif hochsitz.zustand == 'reparatur' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                            {{ hochsitz.get_zustand_display }}
+                        </span>
+                        <span class="badge bg-secondary">{{ hochsitz.get_typ_display }}</span>
+                    </div>
+                    {% if hochsitz.letzte_kontrolle %}
+                    <p class="card-text small mb-1">
+                        <i class="bi bi-calendar-check me-1"></i>Letzte Kontrolle: {{ hochsitz.letzte_kontrolle|date:"d.m.Y" }}
+                    </p>
+                    {% endif %}
+                    {% if hochsitz.baujahr %}
+                    <p class="card-text small mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>Baujahr: {{ hochsitz.baujahr }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group w-100">
+                        <a href="{% url 'hochsitz_detail' hochsitz.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        <a href="{% url 'hochsitz_bearbeiten' hochsitz.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'hochsitz_loeschen' hochsitz.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-house display-1 text-muted"></i>
+                    <h5 class="mt-3">Noch keine Hochsitze</h5>
+                    <p class="text-muted">Erstelle deinen ersten Hochsitz.</p>
+                    {% if reviere %}
+                    <a href="{% url 'hochsitz_neu' %}" class="btn btn-success">
+                        <i class="bi bi-plus-lg me-1"></i>Ersten Hochsitz erstellen
+                    </a>
+                    {% else %}
+                    <a href="{% url 'revier_neu' %}" class="btn btn-success">
+                        <i class="bi bi-geo-alt me-1"></i>Zuerst ein Revier erstellen
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

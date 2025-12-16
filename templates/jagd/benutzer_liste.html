@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Benutzerverwaltung - Jagdtagebuch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people me-2"></i>Benutzerverwaltung</h2>
+        <a href="{% url 'benutzer_neu' %}" class="btn btn-success">
+            <i class="bi bi-person-plus me-1"></i>Neuer Benutzer
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Benutzername</th>
+                            <th>Status</th>
+                            <th>Rolle</th>
+                            <th class="text-center">Einträge</th>
+                            <th>Letzter Login</th>
+                            <th class="text-end">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in benutzer_stats %}
+                        <tr>
+                            <td>
+                                <i class="bi bi-person-circle me-2"></i>
+                                <strong>{{ item.user.username }}</strong>
+                                {% if item.user == request.user %}
+                                <span class="badge bg-info ms-1">Du</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.user.is_active %}
+                                <span class="badge bg-success">Aktiv</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inaktiv</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.user.is_superuser %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-shield-fill me-1"></i>Admin</span>
+                                {% else %}
+                                <span class="badge bg-primary">Benutzer</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">{{ item.eintraege_count }}</span>
+                            </td>
+                            <td>
+                                {% if item.user.last_login %}
+                                {{ item.user.last_login|date:"d.m.Y H:i" }}
+                                {% else %}
+                                <span class="text-muted">Noch nie</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'benutzer_bearbeiten' item.user.pk %}" class="btn btn-outline-secondary btn-sm" title="Bearbeiten">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if item.user != request.user %}
+                                    <a href="{% url 'benutzer_loeschen' item.user.pk %}" class="btn btn-outline-danger btn-sm" title="Löschen">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Keine Benutzer vorhanden.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

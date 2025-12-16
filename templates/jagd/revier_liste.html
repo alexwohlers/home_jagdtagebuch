@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Reviere - Jagdtagebuch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-geo-alt me-2"></i>Reviere</h2>
+        <a href="{% url 'revier_neu' %}" class="btn btn-success">
+            <i class="bi bi-plus-lg me-1"></i>Neues Revier
+        </a>
+    </div>
+    
+    <div class="row">
+        {% for revier in reviere %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-geo-alt-fill text-success me-2"></i>{{ revier.name }}
+                    </h5>
+                    {% if revier.beschreibung %}
+                    <p class="card-text text-muted small">{{ revier.beschreibung|truncatewords:20 }}</p>
+                    {% endif %}
+                    <div class="d-flex align-items-center mb-3">
+                        {% if revier.groesse_ha %}
+                        <span class="badge bg-secondary me-2">{{ revier.groesse_ha }} ha</span>
+                        {% endif %}
+                        <span class="badge bg-primary">
+                            <i class="bi bi-house me-1"></i>{{ revier.hochsitz_count }} Hochsitze
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="btn-group w-100">
+                        <a href="{% url 'hochsitz_liste_revier' revier.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house"></i> Hochsitze
+                        </a>
+                        <a href="{% url 'hochsitz_neu_revier' revier.pk %}" class="btn btn-outline-success btn-sm">
+                            <i class="bi bi-plus"></i>
+                        </a>
+                        <a href="{% url 'revier_bearbeiten' revier.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'revier_loeschen' revier.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-geo-alt display-1 text-muted"></i>
+                    <h5 class="mt-3">Noch keine Reviere</h5>
+                    <p class="text-muted">Erstelle dein erstes Revier, um Hochsitze zu verwalten.</p>
+                    <a href="{% url 'revier_neu' %}" class="btn btn-success">
+                        <i class="bi bi-plus-lg me-1"></i>Erstes Revier erstellen
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Zurück zum Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

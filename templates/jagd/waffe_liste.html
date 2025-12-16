@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Waffen - Jagdtagebuch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header-card {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .waffe-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .waffe-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .waffe-icon {
+        font-size: 2rem;
+    }
+    .badge-aktiv {
+        background-color: #198754;
+    }
+    .badge-inaktiv {
+        background-color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="header-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-1">
+                    <i class="bi bi-bullseye me-2"></i>Waffenverwaltung
+                </h4>
+                <p class="mb-0 opacity-75">{{ waffen|length }} Waffe{% if waffen|length != 1 %}n{% endif %} registriert</p>
+            </div>
+            <a href="{% url 'waffe_neu' %}" class="btn btn-light">
+                <i class="bi bi-plus-lg me-1"></i>Neue Waffe
+            </a>
+        </div>
+    </div>
+
+    {% if waffen %}
+    <div class="row g-4">
+        {% for waffe in waffen %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card waffe-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="waffe-icon">{{ waffe.get_typ_emoji }}</span>
+                        {% if waffe.aktiv %}
+                        <span class="badge badge-aktiv">Aktiv</span>
+                        {% else %}
+                        <span class="badge badge-inaktiv">Inaktiv</span>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title mb-1">{{ waffe.name }}</h5>
+                    <p class="text-muted mb-2">
+                        <strong>{{ waffe.kaliber }}</strong>
+                        {% if waffe.hersteller %}<br>{{ waffe.hersteller }}{% endif %}
+                        {% if waffe.modell %} {{ waffe.modell }}{% endif %}
+                    </p>
+                    <p class="small text-muted mb-0">
+                        <i class="bi bi-tag me-1"></i>{{ waffe.get_typ_display }}
+                        {% if waffe.wbk_nummer %}
+                        <br><i class="bi bi-card-text me-1"></i>WBK: {{ waffe.wbk_nummer }}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 pt-0">
+                    <div class="btn-group w-100">
+                        <a href="{% url 'waffe_bearbeiten' waffe.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>Bearbeiten
+                        </a>
+                        <a href="{% url 'waffe_loeschen' waffe.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Löschen
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-bullseye display-1 text-muted"></i>
+            <h5 class="mt-3">Keine Waffen angelegt</h5>
+            <p class="text-muted">Lege deine erste Waffe an.</p>
+            <a href="{% url 'waffe_neu' %}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>Neue Waffe
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

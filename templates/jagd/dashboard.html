@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load jagd_filters %}
 
 {% block title %}Jagdtagebuch - Projektplanung{% endblock %}
 
@@ -108,7 +108,7 @@
             <div class="card stat-card h-100" style="background: linear-gradient(135deg, #4a7c23 0%, #6b8e23 100%); color: white;">
                 <div class="card-body text-center">
                     <div class="stat-icon">🦌</div>
-                    <div class="fs-2 fw-bold">{{ saison_stats.rehwild }}</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.rehwild }} <small class="fs-5 opacity-75">/ {{ gesamt_stats.rehwild }}</small></div>
                     <div class="small opacity-75">Rehwild</div>
                 </div>
             </div>
@@ -117,7 +117,7 @@
             <div class="card stat-card h-100" style="background: linear-gradient(135deg, #5c4033 0%, #8b4513 100%); color: white;">
                 <div class="card-body text-center">
                     <div class="stat-icon">🐗</div>
-                    <div class="fs-2 fw-bold">{{ saison_stats.schwarzwild }}</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.schwarzwild }} <small class="fs-5 opacity-75">/ {{ gesamt_stats.schwarzwild }}</small></div>
                     <div class="small opacity-75">Schwarzwild</div>
                 </div>
             </div>
@@ -126,7 +126,7 @@
             <div class="card stat-card h-100" style="background: linear-gradient(135deg, #8fbc8f 0%, #3cb371 100%); color: white;">
                 <div class="card-body text-center">
                     <div class="stat-icon">🐰</div>
-                    <div class="fs-2 fw-bold">{{ saison_stats.niederwild }}</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.niederwild }} <small class="fs-5 opacity-75">/ {{ gesamt_stats.niederwild }}</small></div>
                     <div class="small opacity-75">Niederwild</div>
                 </div>
             </div>
@@ -135,7 +135,7 @@
             <div class="card stat-card h-100" style="background: linear-gradient(135deg, #cd853f 0%, #d2691e 100%); color: white;">
                 <div class="card-body text-center">
                     <div class="stat-icon">🦊</div>
-                    <div class="fs-2 fw-bold">{{ saison_stats.raubwild }}</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.raubwild }} <small class="fs-5 opacity-75">/ {{ gesamt_stats.raubwild }}</small></div>
                     <div class="small opacity-75">Raubwild</div>
                 </div>
             </div>
@@ -144,35 +144,26 @@
             <div class="card stat-card h-100" style="background: linear-gradient(135deg, #2e8b57 0%, #228b22 100%); color: white;">
                 <div class="card-body text-center">
                     <div class="stat-icon">🎯</div>
-                    <div class="fs-2 fw-bold">{{ saison_stats.gesamt }}</div>
-                    <div class="small opacity-75">Gesamt</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md-4 col-lg-2">
-            <div class="card stat-card h-100" style="background: linear-gradient(135deg, #556b2f 0%, #6b8e23 100%); color: white;">
-                <div class="card-body text-center">
-                    <div class="stat-icon">📊</div>
-                    <div class="fs-2 fw-bold">{{ alle_count }}</div>
-                    <div class="small opacity-75">Alle Jahre</div>
+                    <div class="fs-2 fw-bold">{{ saison_stats.gesamt }} <small class="fs-5 opacity-75">/ {{ gesamt_stats.gesamt }}</small></div>
+                    <div class="small opacity-75">Saison / Gesamt</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Linke Spalte: Letzte Einträge -->
+        <!-- Linke Spalte: Aktuelle Jagdsaison -->
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Letzte Einträge</h5>
+                    <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Aktuelle Jagdsaison</h5>
                     <a href="{% url 'liste' %}" class="btn btn-outline-success btn-sm">
                         Alle anzeigen <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
                 <div class="card-body p-0">
-                    {% if letzte_eintraege %}
-                    {% for eintrag in letzte_eintraege %}
+                    {% if saison_eintraege %}
+                    {% for eintrag in saison_eintraege %}
                     <div class="wild-card d-flex align-items-center p-3 {% if not forloop.last %}border-bottom{% endif %}">
                         <span class="wild-emoji">{{ eintrag.get_wildart_emoji }}</span>
                         <div class="flex-grow-1">
@@ -186,19 +177,25 @@
                                 {% if eintrag.gewicht %}
                                 <span class="badge bg-secondary ms-1">{{ eintrag.gewicht }} kg</span>
                                 {% endif %}
+                                {% if eintrag.trophaee %}
+                                <i class="bi bi-trophy-fill text-warning ms-1" title="Trophäe aufgehoben"></i>
+                                {% endif %}
                             </div>
                             <small class="text-muted">
                                 <i class="bi bi-calendar3 me-1"></i>{{ eintrag.datum|date:"d.m.Y" }}
                                 {% if eintrag.uhrzeit %}<span class="mx-1">•</span><i class="bi bi-clock me-1"></i>{{ eintrag.uhrzeit|time:"H:i" }}{% endif %}
-                                {% if eintrag.revier %}<span class="mx-1">•</span><i class="bi bi-geo-alt me-1"></i>{{ eintrag.revier }}{% endif %}
+                                {% if eintrag.revier_ref %}<span class="mx-1">•</span><i class="bi bi-geo-alt me-1"></i>{{ eintrag.revier_ref.name }}{% endif %}
                             </small>
                         </div>
                         <div class="btn-group">
                             <a href="{% url 'eintrag_detail' eintrag.pk %}" class="btn btn-outline-secondary btn-sm" title="Details">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{% url 'jagd_eintrag_bearbeiten' eintrag.pk %}" class="btn btn-outline-secondary btn-sm" title="Bearbeiten">
+                            <a href="{% url 'eintrag_bearbeiten' eintrag.pk %}" class="btn btn-outline-secondary btn-sm" title="Bearbeiten">
                                 <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'eintrag_loeschen' eintrag.pk %}" class="btn btn-outline-danger btn-sm" title="Löschen">
+                                <i class="bi bi-trash"></i>
                             </a>
                         </div>
                     </div>
@@ -206,7 +203,7 @@
                     {% else %}
                     <div class="empty-state">
                         <i class="bi bi-journal-x d-block"></i>
-                        <h5>Noch keine Einträge</h5>
+                        <h5>Noch keine Einträge in dieser Saison</h5>
                         <p class="text-muted mb-3">Dokumentiere deinen ersten Jagderfolg!</p>
                         <a href="{% url 'eintrag_neu' %}" class="btn btn-outline-success">
                             <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
@@ -228,13 +225,7 @@
                     {% if wildarten_stats %}
                     {% for stat in wildarten_stats %}
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span>
-                            {% for group, choices in WILDART_CHOICES %}
-                                {% for value, label in choices %}
-                                    {% if value == stat.wildart %}{{ label }}{% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                        </span>
+                        <span>{{ wildart_labels|get_item:stat.wildart }}</span>
                         <span class="badge bg-success rounded-pill">{{ stat.count }}x</span>
                     </div>
                     {% endfor %}
@@ -248,13 +239,33 @@
             {% if reviere %}
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white">
-                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Häufigste Reviere</h6>
+                    <h6 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Reviere</h6>
                 </div>
                 <ul class="list-group list-group-flush">
                     {% for rev in reviere %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-pin-map me-2 text-success"></i>{{ rev.revier }}</span>
+                        <span><i class="bi bi-pin-map me-2 text-success"></i>{{ rev.revier_ref__name }}</span>
                         <span class="badge bg-secondary rounded-pill">{{ rev.count }}x</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Trophäen -->
+            {% if trophaeen %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-trophy text-warning me-2"></i>Trophäensammlung</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for t in trophaeen %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a href="{% url 'eintrag_detail' t.pk %}" class="text-decoration-none text-dark">
+                            <span>{{ wildart_labels|get_item:t.wildart }}</span>
+                            <small class="text-muted ms-2">{{ t.datum|date:"d.m.Y" }}</small>
+                        </a>
+                        {% if t.revier_ref %}<small class="text-muted">{{ t.revier_ref.name }}</small>{% endif %}
                     </li>
                     {% endfor %}
                 </ul>

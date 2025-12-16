@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load jagd_filters %}
+
+{% block title %}Einträge detailliert - Jagdtagebuch{% endblock %}
+
+{% block container_start %}{% endblock %}
+{% block container_end %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .detail-table {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+    .detail-table thead {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .detail-table th {
+        padding: 0.75rem 0.5rem;
+        font-weight: 600;
+        white-space: nowrap;
+        border: none;
+    }
+    .detail-table td {
+        padding: 0.5rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .detail-table tbody tr:hover {
+        background-color: rgba(74, 124, 35, 0.08);
+    }
+    .detail-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    .detail-table tbody tr:nth-child(even):hover {
+        background-color: rgba(74, 124, 35, 0.12);
+    }
+    .header-card {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .badge-m { background-color: #0d6efd; }
+    .badge-w { background-color: #dc3545; }
+    .badge-u { background-color: #6c757d; }
+    .text-truncate-cell {
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .btn-action {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
+    .export-btns {
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="header-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h4 class="mb-1">
+                    <i class="bi bi-table me-2"></i>Einträge detailliert
+                </h4>
+                <p class="mb-0 opacity-75">{{ eintraege|length }} Einträge - Alle Datenbankfelder</p>
+            </div>
+            <div class="d-flex export-btns flex-wrap mt-2 mt-md-0">
+                <button class="btn btn-light btn-sm" onclick="exportTableToCSV()">
+                    <i class="bi bi-download me-1"></i>CSV Export
+                </button>
+                <button class="btn btn-light btn-sm" onclick="window.print()">
+                    <i class="bi bi-printer me-1"></i>Drucken
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {% if eintraege %}
+    <!-- Tabelle -->
+    <div class="table-container bg-white">
+        <table class="table detail-table table-bordered" id="detailTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Datum</th>
+                    <th>Uhrzeit</th>
+                    <th>Wildart</th>
+                    <th>Wildart (Custom)</th>
+                    <th>Geschl.</th>
+                    <th>Gewicht (kg)</th>
+                    <th>Alter</th>
+                    <th>Revier</th>
+                    <th>Hochsitz</th>
+                    <th>Jagdart</th>
+                    <th>Waffe</th>
+                    <th>Entfernung (m)</th>
+                    <th>Wetter</th>
+                    <th>Temp. (°C)</th>
+                    <th>Trophäe</th>
+                    <th>Notizen</th>
+                    <th>Erstellt</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in eintraege %}
+                <tr>
+                    <td>{{ e.pk }}</td>
+                    <td>{{ e.datum|date:"d.m.Y" }}</td>
+                    <td>{{ e.uhrzeit|time:"H:i"|default:"-" }}</td>
+                    <td>{{ wildart_labels|get_item:e.wildart|default:e.wildart }}</td>
+                    <td>{{ e.wildart_custom|default:"-" }}</td>
+                    <td>
+                        {% if e.geschlecht == 'm' %}
+                        <span class="badge badge-m">♂</span>
+                        {% elif e.geschlecht == 'w' %}
+                        <span class="badge badge-w">♀</span>
+                        {% else %}
+                        <span class="badge badge-u">?</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ e.gewicht|default:"-" }}</td>
+                    <td>{{ e.alter_geschaetzt|default:"-" }}</td>
+                    <td>{{ e.revier_ref.name|default:"-" }}</td>
+                    <td>
+                        {% if e.hochsitz_ref %}
+                        {{ e.hochsitz_ref.get_typ_emoji }} {{ e.hochsitz_ref.name }}
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ e.jagdart|default:"-" }}</td>
+                    <td>{% if e.waffe_ref %}{{ e.waffe_ref.name }}{% else %}-{% endif %}</td>
+                    <td>{{ e.entfernung|default:"-" }}</td>
+                    <td>{{ e.wetter|default:"-" }}</td>
+                    <td>{{ e.temperatur|default:"-" }}</td>
+                    <td>
+                        {% if e.trophaee %}
+                        <i class="bi bi-trophy-fill text-warning"></i>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td class="text-truncate-cell" title="{{ e.notizen }}">{{ e.notizen|default:"-" }}</td>
+                    <td>{{ e.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{% url 'eintrag_detail' e.pk %}" class="btn btn-outline-success btn-action" title="Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'eintrag_bearbeiten' e.pk %}" class="btn btn-outline-secondary btn-action" title="Bearbeiten">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Legende -->
+    <div class="mt-3 text-muted small">
+        <strong>Legende:</strong>
+        <span class="badge badge-m ms-2">♂</span> Männlich
+        <span class="badge badge-w ms-2">♀</span> Weiblich
+        <span class="badge badge-u ms-2">?</span> Unbekannt
+        <i class="bi bi-trophy-fill text-warning ms-2"></i> Trophäe aufgehoben
+    </div>
+
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <h5 class="mt-3">Keine Einträge vorhanden</h5>
+            <p class="text-muted">Erstelle deinen ersten Eintrag im Jagdtagebuch.</p>
+            <a href="{% url 'eintrag_neu' %}" class="btn btn-success">
+                <i class="bi bi-plus-lg me-1"></i>Neuer Eintrag
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function exportTableToCSV() {
+    const table = document.getElementById('detailTable');
+    let csv = [];
+    
+    // Header
+    const headers = [];
+    table.querySelectorAll('thead th').forEach(th => {
+        // Skip Aktionen column
+        if (th.textContent.trim() !== 'Aktionen') {
+            headers.push('"' + th.textContent.trim().replace(/"/g, '""') + '"');
+        }
+    });
+    csv.push(headers.join(';'));
+    
+    // Data rows
+    table.querySelectorAll('tbody tr').forEach(row => {
+        const rowData = [];
+        const cells = row.querySelectorAll('td');
+        for (let i = 0; i < cells.length - 1; i++) { // Skip last column (Aktionen)
+            let text = cells[i].textContent.trim().replace(/"/g, '""');
+            rowData.push('"' + text + '"');
+        }
+        csv.push(rowData.join(';'));
+    });
+    
+    // Download
+    const csvContent = '\uFEFF' + csv.join('\n'); // BOM for Excel
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'jagdtagebuch_export_' + new Date().toISOString().split('T')[0] + '.csv';
+    link.click();
+}
+</script>
+
+<style>
+@media print {
+    .navbar, .header-card, .btn, .export-btns {
+        display: none !important;
+    }
+    .table-container {
+        box-shadow: none !important;
+    }
+    .detail-table {
+        font-size: 10px !important;
+    }
+    .detail-table th, .detail-table td {
+        padding: 2px 4px !important;
+    }
+}
+</style>
+{% endblock %}

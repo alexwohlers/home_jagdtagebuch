@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ aktion }} - Jagdtagebuch{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #2d5016 0%, #4a7c23 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 1.5rem;
+    }
+    .form-card {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <div class="form-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-bullseye me-2"></i>{{ aktion }}
+                    </h4>
+                </div>
+                
+                <form method="post" class="card-body p-4">
+                    {% csrf_token %}
+                    
+                    <div class="row g-3">
+                        <!-- Bezeichnung -->
+                        <div class="col-md-8">
+                            <label class="form-label">Bezeichnung *</label>
+                            <input type="text" name="name" class="form-control" required
+                                   placeholder="z.B. Blaser R8"
+                                   value="{{ waffe.name|default:'' }}">
+                        </div>
+                        
+                        <!-- Typ -->
+                        <div class="col-md-4">
+                            <label class="form-label">Waffentyp</label>
+                            <select name="typ" class="form-select">
+                                {% for value, label in TYP_CHOICES %}
+                                <option value="{{ value }}" {% if waffe.typ == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Kaliber -->
+                        <div class="col-md-6">
+                            <label class="form-label">Kaliber *</label>
+                            <input type="text" name="kaliber" class="form-control" required
+                                   placeholder="z.B. .308 Win, 12/70"
+                                   value="{{ waffe.kaliber|default:'' }}">
+                        </div>
+                        
+                        <!-- Hersteller -->
+                        <div class="col-md-6">
+                            <label class="form-label">Hersteller</label>
+                            <input type="text" name="hersteller" class="form-control"
+                                   placeholder="z.B. Blaser, Merkel, Sauer"
+                                   value="{{ waffe.hersteller|default:'' }}">
+                        </div>
+                        
+                        <!-- Modell -->
+                        <div class="col-md-6">
+                            <label class="form-label">Modell</label>
+                            <input type="text" name="modell" class="form-control"
+                                   placeholder="z.B. R8 Professional Success"
+                                   value="{{ waffe.modell|default:'' }}">
+                        </div>
+                        
+                        <!-- Seriennummer -->
+                        <div class="col-md-6">
+                            <label class="form-label">Seriennummer</label>
+                            <input type="text" name="seriennummer" class="form-control"
+                                   placeholder="Seriennummer"
+                                   value="{{ waffe.seriennummer|default:'' }}">
+                        </div>
+                        
+                        <!-- WBK-Nummer -->
+                        <div class="col-md-6">
+                            <label class="form-label">WBK-Nummer</label>
+                            <input type="text" name="wbk_nummer" class="form-control"
+                                   placeholder="Waffenbesitzkarten-Nr."
+                                   value="{{ waffe.wbk_nummer|default:'' }}">
+                        </div>
+                        
+                        <!-- Kaufdatum -->
+                        <div class="col-md-6">
+                            <label class="form-label">Kaufdatum</label>
+                            <input type="date" name="kaufdatum" class="form-control"
+                                   value="{{ waffe.kaufdatum|date:'Y-m-d'|default:'' }}">
+                        </div>
+                        
+                        <!-- Notizen -->
+                        <div class="col-12">
+                            <label class="form-label">Notizen</label>
+                            <textarea name="notizen" class="form-control" rows="3"
+                                      placeholder="Optik, Zubehör, Bemerkungen...">{{ waffe.notizen|default:'' }}</textarea>
+                        </div>
+                        
+                        <!-- Aktiv -->
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="aktiv" id="aktiv"
+                                       {% if waffe.aktiv or not waffe %}checked{% endif %}>
+                                <label class="form-check-label" for="aktiv">Waffe aktiv</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between pt-4 mt-3 border-top">
+                        <a href="{% url 'waffe_liste' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Abbrechen
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Speichern
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

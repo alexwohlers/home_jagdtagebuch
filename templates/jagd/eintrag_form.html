@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load l10n %}
 
 {% block title %}{% if eintrag %}Eintrag bearbeiten{% else %}Neuer Eintrag{% endif %} - Jagdtagebuch{% endblock %}
 
@@ -133,6 +133,7 @@
                                 <div class="col-7">
                                     <label class="form-label">Datum *</label>
                                     <input type="date" name="datum" class="form-control" required
+                                           min="2020-01-01" max="2099-12-31"
                                            value="{{ eintrag.datum|date:'Y-m-d'|default:heute }}">
                                 </div>
                                 <div class="col-5">
@@ -157,15 +158,35 @@
                     </div>
 
                     <!-- Ort & Revier -->
-                    <h5 class="section-title"><i class="bi bi-geo-alt me-2"></i>Ort & Revier</h5>
-                    <div class="mb-4">
-                        <input type="text" name="revier" class="form-control form-control-lg" 
-                               placeholder="z.B. Revier Nord, Hochsitz 3, Waldrand..."
-                               value="{% if eintrag %}{{ eintrag.revier|default:'' }}{% elif letzter_eintrag %}{{ letzter_eintrag.revier|default:'' }}{% endif %}"
-                               list="revierList">
-                        <datalist id="revierList">
-                            <!-- Wird mit bisherigen Revieren gefüllt -->
-                        </datalist>
+                    <h5 class="section-title"><i class="bi bi-geo-alt me-2"></i>Revier & Hochsitz</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Revier</label>
+                            <select name="revier_ref" id="revier_ref" class="form-select" onchange="filterHochsitze()">
+                                <option value="">-- Revier wählen --</option>
+                                {% for r in reviere %}
+                                <option value="{{ r.pk }}" {% if eintrag.revier_ref.pk == r.pk %}selected{% endif %}>
+                                    {{ r.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if not reviere %}
+                            <div class="form-text">
+                                <a href="{% url 'revier_neu' %}">Erst ein Revier anlegen</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hochsitz (optional)</label>
+                            <select name="hochsitz_ref" id="hochsitz_ref" class="form-select">
+                                <option value="">-- Hochsitz wählen --</option>
+                                {% for h in hochsitze %}
+                                <option value="{{ h.pk }}" data-revier="{{ h.revier.pk }}" {% if eintrag.hochsitz_ref.pk == h.pk %}selected{% endif %}>
+                                    {{ h.get_typ_emoji }} {{ h.name }} ({{ h.revier.name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -177,7 +198,7 @@
                                     <label class="form-label">Gewicht (kg)</label>
                                     <input type="number" name="gewicht" class="form-control" step="0.1" min="0"
                                            placeholder="z.B. 15.5"
-                                           value="{{ eintrag.gewicht|default:'' }}">
+                                           value="{{ eintrag.gewicht|unlocalize|default:'' }}">
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label">Geschätztes Alter</label>
@@ -209,7 +230,7 @@
                                     <label class="form-label">Entfernung (m)</label>
                                     <input type="number" name="entfernung" class="form-control" min="0"
                                            placeholder="z.B. 80"
-                                           value="{{ eintrag.entfernung|default:'' }}">
+                                           value="{{ eintrag.entfernung|unlocalize|default:'' }}">
                                 </div>
                             </div>
                         </div>
@@ -217,10 +238,20 @@
 
                     <!-- Waffe -->
                     <div class="mb-4">
-                        <label class="form-label">Waffe / Kaliber</label>
-                        <input type="text" name="waffe" class="form-control"
-                               placeholder="z.B. .308 Win, 12/70 Flinte..."
-                               value="{% if eintrag %}{{ eintrag.waffe|default:'' }}{% elif letzter_eintrag %}{{ letzter_eintrag.waffe|default:'' }}{% endif %}">
+                        <label class="form-label">Waffe</label>
+                        <select name="waffe_ref" class="form-select">
+                            <option value="">-- Waffe wählen --</option>
+                            {% for w in waffen %}
+                            <option value="{{ w.pk }}" {% if eintrag.waffe_ref.pk == w.pk %}selected{% elif not eintrag and letzter_eintrag and letzter_eintrag.waffe_ref.pk == w.pk %}selected{% endif %}>
+                                {{ w.name }}{% if w.kaliber %} ({{ w.kaliber }}){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if not waffen %}
+                        <div class="form-text">
+                            <a href="{% url 'waffe_neu' %}">Erst eine Waffe anlegen</a>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <!-- Wetter -->
@@ -244,7 +275,7 @@
                             <div class="input-group">
                                 <input type="number" name="temperatur" class="form-control" 
                                        placeholder="Temp." min="-30" max="45"
-                                       value="{{ eintrag.temperatur|default:'' }}">
+                                       value="{{ eintrag.temperatur|unlocalize|default:'' }}">
                                 <span class="input-group-text">°C</span>
                             </div>
                         </div>
@@ -255,6 +286,17 @@
                     <div class="mb-4">
                         <textarea name="notizen" class="form-control" rows="4"
                                   placeholder="Besondere Beobachtungen, Umstände, Markierungen...">{{ eintrag.notizen|default:'' }}</textarea>
+                    </div>
+
+                    <!-- Trophäe -->
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="trophaee" id="trophaee"
+                                   {% if eintrag.trophaee %}checked{% endif %}>
+                            <label class="form-check-label" for="trophaee">
+                                <i class="bi bi-trophy me-1 text-warning"></i>Trophäe aufgehoben
+                            </label>
+                        </div>
                     </div>
 
                     <!-- Buttons -->
@@ -279,6 +321,32 @@ function toggleCustomWildart(radio) {
     div.style.display = radio.checked ? 'block' : 'none';
 }
 
+// Hochsitze nach gewähltem Revier filtern
+function filterHochsitze() {
+    const revierSelect = document.getElementById('revier_ref');
+    const hochsitzSelect = document.getElementById('hochsitz_ref');
+    const selectedRevier = revierSelect.value;
+    const currentHochsitz = hochsitzSelect.value;
+    
+    Array.from(hochsitzSelect.options).forEach(option => {
+        if (option.value === '') {
+            // Placeholder immer zeigen
+            option.style.display = '';
+        } else {
+            const optionRevier = option.getAttribute('data-revier');
+            if (!selectedRevier || optionRevier === selectedRevier) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+                // Wenn der aktuell gewählte Hochsitz versteckt wird, zurücksetzen
+                if (option.value === currentHochsitz) {
+                    hochsitzSelect.value = '';
+                }
+            }
+        }
+    });
+}
+
 // Prüfen bei Seitenlade ob Sonstiges ausgewählt
 document.addEventListener('DOMContentLoaded', function() {
     const sonstigesRadio = document.getElementById('wildart_sonstiges');
@@ -293,6 +361,9 @@ document.addEventListener('DOMContentLoaded', function() {
             div.style.display = this.value === 'sonstiges' ? 'block' : 'none';
         });
     });
+    
+    // Initial Hochsitze filtern
+    filterHochsitze();
 });
 </script>
 {% endblock %}

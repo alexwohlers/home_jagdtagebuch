@@ -106,8 +106,8 @@
                     <label class="form-label">Revier</label>
                     <select name="revier" class="form-select">
                         <option value="">Alle Reviere</option>
-                        {% for revier in reviere %}
-                        <option value="{{ revier }}" {% if request.GET.revier == revier %}selected{% endif %}>{{ revier }}</option>
+                        {% for r in reviere %}
+                        <option value="{{ r.pk }}" {% if request.GET.revier == r.pk|stringformat:"s" %}selected{% endif %}>{{ r.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -166,7 +166,10 @@
                             <br><small class="text-muted">{{ eintrag.uhrzeit|time:"H:i" }} Uhr</small>
                             {% endif %}
                         </td>
-                        <td>{{ eintrag.get_wildart_display }}</td>
+                        <td>
+                            {{ eintrag.get_wildart_display }}
+                            {% if eintrag.trophaee %}<i class="bi bi-trophy-fill text-warning ms-1" title="Trophäe"></i>{% endif %}
+                        </td>
                         <td>
                             {% if eintrag.geschlecht == 'm' %}
                             <span class="badge badge-geschlecht-m">♂</span>
@@ -184,8 +187,8 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if eintrag.revier %}
-                            <i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier }}
+                            {% if eintrag.revier_ref %}
+                            <i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier_ref.name }}
                             {% else %}
                             <span class="text-muted">-</span>
                             {% endif %}

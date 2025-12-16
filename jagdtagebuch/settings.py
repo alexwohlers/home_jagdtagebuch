@@ -84,12 +84,17 @@ LOGIN_URL = 'login'
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
-# Subpath routing settings for /jagdtagebuch/
-FORCE_SCRIPT_NAME = '/jagdtagebuch'
-CSRF_TRUSTED_ORIGINS = ['http://194.164.206.13', 'https://194.164.206.13']
+# Subpath routing - entfernt, da jetzt über Middleware dynamisch
+# FORCE_SCRIPT_NAME wird durch Middleware basierend auf X-Script-Name Header gesetzt
+CSRF_TRUSTED_ORIGINS = [
+    'http://194.164.206.13', 
+    'https://194.164.206.13',
+    'https://projekte.prof-wohlers.de',
+    'https://jagd.prof-wohlers.de',
+]
 SESSION_COOKIE_NAME = 'jagdtagebuch_sessionid'
-SESSION_COOKIE_PATH = '/jagdtagebuch'
+SESSION_COOKIE_PATH = '/'
 CSRF_COOKIE_NAME = 'jagdtagebuch_csrftoken'
-CSRF_COOKIE_PATH = '/jagdtagebuch'
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_PATH = '/'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True

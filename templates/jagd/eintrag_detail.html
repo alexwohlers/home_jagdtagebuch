@@ -95,10 +95,19 @@
                             </div>
                             {% endif %}
                             
-                            {% if eintrag.revier %}
+                            {% if eintrag.revier_ref %}
                             <div class="detail-item">
-                                <div class="detail-label">Revier / Ort</div>
-                                <div class="detail-value"><i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier }}</div>
+                                <div class="detail-label">Revier</div>
+                                <div class="detail-value"><i class="bi bi-geo-alt text-success me-1"></i>{{ eintrag.revier_ref.name }}</div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if eintrag.hochsitz_ref %}
+                            <div class="detail-item">
+                                <div class="detail-label">Hochsitz</div>
+                                <div class="detail-value">
+                                    {{ eintrag.hochsitz_ref.get_typ_emoji }} {{ eintrag.hochsitz_ref.name }}
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -112,10 +121,10 @@
                             </div>
                             {% endif %}
                             
-                            {% if eintrag.waffe %}
+                            {% if eintrag.waffe_ref %}
                             <div class="detail-item">
-                                <div class="detail-label">Waffe / Kaliber</div>
-                                <div class="detail-value">{{ eintrag.waffe }}</div>
+                                <div class="detail-label">Waffe</div>
+                                <div class="detail-value">{{ eintrag.waffe_ref.name }}{% if eintrag.waffe_ref.kaliber %} ({{ eintrag.waffe_ref.kaliber }}){% endif %}</div>
                             </div>
                             {% endif %}
                             
@@ -137,6 +146,17 @@
                                 </div>
                             </div>
                             {% endif %}
+                            
+                            <div class="detail-item">
+                                <div class="detail-label">Trophäe</div>
+                                <div class="detail-value">
+                                    {% if eintrag.trophaee %}
+                                    <i class="bi bi-trophy-fill text-warning me-1"></i>Aufgehoben
+                                    {% else %}
+                                    <span class="text-muted">Nicht aufgehoben</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     

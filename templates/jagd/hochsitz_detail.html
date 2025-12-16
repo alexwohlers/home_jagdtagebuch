@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ hochsitz.name }} - Jagdtagebuch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <span class="me-2">{{ hochsitz.get_typ_emoji }}</span>{{ hochsitz.name }}
+                    </h5>
+                    <div class="btn-group">
+                        <a href="{% url 'hochsitz_bearbeiten' hochsitz.pk %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>Bearbeiten
+                        </a>
+                        <a href="{% url 'hochsitz_loeschen' hochsitz.pk %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash me-1"></i>Löschen
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Revier</div>
+                        <div class="col-sm-8">
+                            <i class="bi bi-geo-alt me-1"></i>{{ hochsitz.revier.name }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Typ</div>
+                        <div class="col-sm-8">{{ hochsitz.get_typ_display }}</div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Zustand</div>
+                        <div class="col-sm-8">
+                            <span class="badge {% if hochsitz.zustand == 'gut' %}bg-success{% elif hochsitz.zustand == 'neu' %}bg-info{% elif hochsitz.zustand == 'reparatur' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ hochsitz.get_zustand_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Status</div>
+                        <div class="col-sm-8">
+                            {% if hochsitz.aktiv %}
+                            <span class="badge bg-success">Aktiv</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inaktiv</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if hochsitz.baujahr %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Baujahr</div>
+                        <div class="col-sm-8">{{ hochsitz.baujahr }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if hochsitz.letzte_kontrolle %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Letzte Kontrolle</div>
+                        <div class="col-sm-8">{{ hochsitz.letzte_kontrolle|date:"d.m.Y" }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if hochsitz.gps_latitude and hochsitz.gps_longitude %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">GPS-Koordinaten</div>
+                        <div class="col-sm-8">
+                            <a href="https://www.google.com/maps?q={{ hochsitz.gps_latitude }},{{ hochsitz.gps_longitude }}" 
+                               target="_blank" class="text-decoration-none">
+                                <i class="bi bi-map me-1"></i>{{ hochsitz.gps_latitude }}, {{ hochsitz.gps_longitude }}
+                                <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if hochsitz.beschreibung %}
+                    <hr>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Beschreibung</div>
+                        <div class="col-sm-8">{{ hochsitz.beschreibung|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if hochsitz.notizen %}
+                    <div class="row mb-3">
+                        <div class="col-sm-4 text-muted">Notizen</div>
+                        <div class="col-sm-8">{{ hochsitz.notizen|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted">Erstellt</div>
+                        <div class="col-sm-8 small text-muted">{{ hochsitz.created_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 text-muted">Aktualisiert</div>
+                        <div class="col-sm-8 small text-muted">{{ hochsitz.updated_at|date:"d.m.Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <a href="{% url 'hochsitz_liste' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Zurück zur Liste
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
